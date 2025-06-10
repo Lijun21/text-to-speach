@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Reader App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: #e2e8f0;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #4299e1;
+            color: white;
+        }
+
+        .tab:hover {
+            background: #3182ce;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+        }
+
+        .file-input:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .file-input input {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .settings {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .setting-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .setting-group label {
+            font-weight: 500;
+            color: #4a5568;
+            min-width: 80px;
+        }
+
+        select, input[type="range"] {
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            width: 150px;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .status.speaking {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status.paused {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+
+        .extract-btn {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 Text Reader</h1>
+        
+        <div class="input-section">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('text')">✏️ Text</button>
+                <button class="tab" onclick="switchTab('file')">📄 Files</button>
+                <button class="tab" onclick="switchTab('url')">🌐 Web</button>
+            </div>
+
+            <div id="text-tab" class="tab-content active">
+                <textarea id="textInput" placeholder="Paste your text here or start typing..."></textarea>
+            </div>
+
+            <div id="file-tab" class="tab-content">
+                <div class="file-input" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept=".txt,.pdf" onchange="handleFile(this)">
+                    <p>📁 Click to select files (TXT, PDF)</p>
+                    <small>Supported formats: .txt, .pdf</small>
+                </div>
+            </div>
+
+            <div id="url-tab" class="tab-content">
+                <input type="url" id="urlInput" class="url-input" placeholder="Enter article URL...">
+                <button class="btn btn-primary extract-btn" onclick="extractFromUrl()">Extract Text</button>
+            </div>
+        </div>
+
+        <div class="settings">
+            <div class="setting-group">
+                <label>Voice:</label>
+                <select id="voiceSelect"></select>
+            </div>
+            <div class="setting-group">
+                <label>Speed:</label>
+                <input type="range" id="speedRange" min="0.5" max="2" step="0.1" value="1">
+                <span id="speedValue">1.0x</span>
+            </div>
+            <div class="setting-group">
+                <label>Pitch:</label>
+                <input type="range" id="pitchRange" min="0" max="2" step="0.1" value="1">
+                <span id="pitchValue">1.0</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="playBtn" onclick="startReading()">▶️ Play</button>
+            <button class="btn btn-secondary" id="pauseBtn" onclick="pauseReading()" disabled>⏸️ Pause</button>
+            <button class="btn btn-secondary" id="stopBtn" onclick="stopReading()" disabled>⏹️ Stop</button>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        let speech = null;
+        let isPaused = false;
+        let currentText = '';
+        let currentPosition = 0;
+
+        // Initialize voices
+        function loadVoices() {
+            const voices = speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voiceSelect');
+            voiceSelect.innerHTML = '';
+            
+            voices.forEach((voice, index) => {
+                if (voice.lang.includes('en')) {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    voiceSelect.appendChild(option);
+                }
+            });
+        }
+
+        // Load voices when they're available
+        speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        // File handling
+        function handleFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            
+            if (file.type === 'application/pdf') {
+                reader.onload = function(e) {
+                    const typedarray = new Uint8Array(e.target.result);
+                    
+                    pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                        let textContent = '';
+                        const numPages = pdf.numPages;
+                        let pagesProcessed = 0;
+
+                        for (let i = 1; i <= numPages; i++) {
+                            pdf.getPage(i).then(page => {
+                                page.getTextContent().then(content => {
+                                    const pageText = content.items.map(item => item.str).join(' ');
+                                    textContent += pageText + '\n\n';
+                                    pagesProcessed++;
+                                    
+                                    if (pagesProcessed === numPages) {
+                                        document.getElementById('textInput').value = textContent.trim();
+                                        switchTab('text');
+                                    }
+                                });
+                            });
+                        }
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                reader.onload = function(e) {
+                    document.getElementById('textInput').value = e.target.result;
+                    switchTab('text');
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // URL extraction (simple implementation)
+        async function extractFromUrl() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            try {
+                // This is a simplified approach - in a real app, you'd need a backend service
+                // For now, we'll just show instructions
+                alert('URL extraction requires a backend service. For now, please copy and paste the article text directly into the Text tab.');
+            } catch (error) {
+                alert('Error extracting text from URL. Please copy and paste the text manually.');
+            }
+        }
+
+        // Speech controls
+        function startReading() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                alert('Please enter some text to read');
+                return;
+            }
+
+            if (isPaused && speech) {
+                speechSynthesis.resume();
+                isPaused = false;
+                updateStatus('Speaking...', 'speaking');
+                updateButtons();
+                return;
+            }
+
+            currentText = text;
+            speech = new SpeechSynthesisUtterance(text);
+            
+            // Set voice
+            const voices = speechSynthesis.getVoices();
+            const selectedVoice = document.getElementById('voiceSelect').value;
+            if (voices[selectedVoice]) {
+                speech.voice = voices[selectedVoice];
+            }
+
+            // Set speed and pitch
+            speech.rate = parseFloat(document.getElementById('speedRange').value);
+            speech.pitch = parseFloat(document.getElementById('pitchRange').value);
+
+            // Event handlers
+            speech.onstart = function() {
+                updateStatus('Speaking...', 'speaking');
+                updateButtons();
+            };
+
+            speech.onend = function() {
+                updateStatus('Finished reading', '');
+                resetButtons();
+                document.getElementById('progressBar').style.width = '100%';
+            };
+
+            speech.onerror = function(event) {
+                updateStatus('Error: ' + event.error, '');
+                resetButtons();
+            };
+
+            // Start speaking
+            speechSynthesis.speak(speech);
+        }
+
+        function pauseReading() {
+            if (speechSynthesis.speaking && !speechSynthesis.paused) {
+                speechSynthesis.pause();
+                isPaused = true;
+                updateStatus('Paused', 'paused');
+                updateButtons();
+            }
+        }
+
+        function stopReading() {
+            speechSynthesis.cancel();
+            isPaused = false;
+            speech = null;
+            updateStatus('Stopped', '');
+            resetButtons();
+            document.getElementById('progressBar').style.width = '0%';
+        }
+
+        // UI updates
+        function updateStatus(message, className) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + className;
+            status.style.display = message ? 'block' : 'none';
+        }
+
+        function updateButtons() {
+            document.getElementById('playBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = false;
+        }
+
+        function resetButtons() {
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = true;
+        }
+
+        // Range input updates
+        document.getElementById('speedRange').oninput = function() {
+            document.getElementById('speedValue').textContent = this.value + 'x';
+        };
+
+        document.getElementById('pitchRange').oninput = function() {
+            document.getElementById('pitchValue').textContent = this.value;
+        };
+
+        // Simple progress simulation
+        function updateProgress() {
+            if (speechSynthesis.speaking && !speechSynthesis.paused) {
+                const progressBar = document.getElementById('progressBar');
+                let currentWidth = parseFloat(progressBar.style.width) || 0;
+                if (currentWidth < 100) {
+                    progressBar.style.width = (currentWidth + 0.5) + '%';
+                }
+            }
+        }
+
+        setInterval(updateProgress, 100);
+    </script>
+</body>
+</html>
